@@ -6,14 +6,16 @@
 #include <sstream>
 using namespace std;
 
+#include <TSystem.h>
+
 // Init() / Reset ()
 
 void UACanvas::Init() {
 
    CanvasName_  = "UACanvas" ; 
    CanvasTitle_ = "UACanvas" ; 
-   CanvasSizeX_ = 500 ;
-   CanvasSizeY_ = 500 ;
+   CanvasSizeX_ = 700 ;
+   CanvasSizeY_ = 700 ;
    CanvasPosX_  = 0 ;
    CanvasPosY_  = 0 ;
 
@@ -206,3 +208,48 @@ void UACanvas::GlueAllPads( ) {
 
 }
 
+void UACanvas::AddText( TString text , Double_t x , Double_t y , Double_t size ) {
+  TLatex* t = new TLatex( x , y , text);
+  t->SetNDC(kTRUE);
+  t->SetTextSize(size);
+  t->Draw();
+}
+
+void UACanvas::Save(TString name , TString basedir){
+
+  string filename ("");
+  filename += basedir;
+  filename += "/gif/";
+  if (!gSystem->OpenDirectory(filename.c_str())) gSystem->mkdir(filename.c_str(),true);
+  filename += name;
+  if(Canvas_->GetLogy()) filename +="_logY";
+  filename += ".gif";
+  Canvas_->SaveAs(filename.c_str(),"");
+  cout << "[UACanvas::Save] Saved Canvas in gif : " << filename << endl;
+
+
+  filename = "";
+  filename += basedir;
+  filename += "/eps/";
+  if (!gSystem->OpenDirectory(filename.c_str())) gSystem->mkdir(filename.c_str(),true);
+  filename += name;
+  if(Canvas_->GetLogy()) filename +="_logY";
+  filename += ".eps";
+  Canvas_->SaveAs(filename.c_str(),"");
+  cout << "[UACanvas::Save] Saved Canvas in eps : " << filename << endl;
+  
+  string command("convert ") ;
+  command += filename + " "; 
+  filename = "";
+  filename += basedir;
+  filename += "/pdf/";
+  if (!gSystem->OpenDirectory(filename.c_str())) gSystem->mkdir(filename.c_str(),true);
+  filename += name;
+  if(Canvas_->GetLogy()) filename +="_logY";
+  filename += ".pdf";
+  command += filename;
+  gSystem->Exec(command.c_str());
+  cout << "[UACanvas::Save] Saved Canvas in pdf : " << filename << endl;
+  
+  
+}

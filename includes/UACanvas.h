@@ -3,6 +3,7 @@
 
 #include <TCanvas.h>
 #include <TString.h>
+#include <TLatex.h>
 
 #include <vector>
 using namespace std;
@@ -43,6 +44,7 @@ class UACanvas {
 
     void Init() ;
     void Reset();
+    void Save(TString , TString = "../figs/");
 
     TCanvas* GetCanvas()      { return Canvas_ ;}
     TPad*    GetPad(Int_t=0 ) ;
@@ -53,6 +55,7 @@ class UACanvas {
     void GluePads  ( Int_t , Int_t ) ; 
     void GlueAllPads();
 
+    void AddText(TString , Double_t , Double_t , Double_t = 0.04);
 };
 
 #endif

@@ -30,6 +30,7 @@ class UACurve : public UACurveStyle  {
     
     UACurve( bool = true , TString="NONE" );
     UACurve( bool, TString , TString , TString="NONE" );
+    UACurve( bool , TString , Int_t = 0 );
 
     virtual ~UACurve();
 
@@ -64,6 +65,7 @@ class UACurve : public UACurveStyle  {
 
 
     void ApplyStyle();
+    void SetGoodAxis();
 
     Double_t GetMaximum() ; // Find Maximum 
     Double_t GetMinimum() ; // Find Minimum 

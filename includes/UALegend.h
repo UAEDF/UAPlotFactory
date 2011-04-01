@@ -6,7 +6,7 @@
 
 #include "UACurveStyle.h"
 #include "UACurve.h"
-#include "UAPlot.h"
+//#include "UAPlot.h"
 
 #include <vector>
 
@@ -24,13 +24,18 @@ class UALegend {
   public:
 
     UALegend() ;
+    UALegend(TString) ;
     virtual ~UALegend() ;
    
     void AddLegend( bool , UACurveStyle& , TString="NONE" ) ;
     void AddLegend(     UACurve&         , TString="NONE" ) ;
 
-    void BuildLegend();
+    void BuildLegend(Double_t , Double_t);
+    void BuildLegend(Int_t ipos = 0){BuildLegend(x[ipos] , y[ipos]);};
     void Draw();
+    
+    static Double_t x[] ;
+    static Double_t y[] ;
  
 };
 

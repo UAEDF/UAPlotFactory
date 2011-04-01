@@ -5,9 +5,22 @@
 #include <sstream>
 using namespace std;
 
-// Defaul Constructor ----------------------------------------------------------
+Double_t UALegend::x[11] = { 0.57 , 0.35 , 0.20 , 0.70 , 0.70 , 0.75 , 0.45 , 0.80 , 0.20 , 0.55 , 0.60};
+Double_t UALegend::y[11] = { 0.80 , 0.40 , 0.40 , 0.85 , 0.90 , 0.90 , 0.87 , 0.87 , 0.90 , 0.40 , 0.93};
+
+
+// Default Constructor ----------------------------------------------------------
 
 UALegend::UALegend(){
+
+  cout << "UALegend: Default Constructor" << endl ;
+
+}
+
+
+//  Constructor ----------------------------------------------------------
+
+UALegend::UALegend(TString LegTitle):LegendTitle_(LegTitle){
 
   cout << "UALegend: Constructor" << endl ;
 
@@ -53,8 +66,7 @@ void UALegend::AddLegend (UACurve& Curve , TString LegText ) {
 
 
 // BuildLegend() -------------------------------------------------------------
-
-void UALegend::BuildLegend() {
+void UALegend::BuildLegend(Double_t xmin , Double_t ymax) {
 
   // Get Legend size:
   int LegendSize = 1;
@@ -66,13 +78,13 @@ void UALegend::BuildLegend() {
 
   // Set Legend Panel size:
 
-  double xlegmin = .6 ;
-  double ylegmax = .9 ;
-  double yLegendWidth = .03 ;
+  double xlegmin = xmin ;
+  double ylegmax = ymax ;
+  double yLegendWidth = .045 ;
   double xLegendWidth = .20 ;
-  double  legfactor = 1. ;
+  double legfactor = 1. ;
 
-  double globalLegendTextSize = .3 ;
+  double globalLegendTextSize = 0.04 ;
 
   Legend_ = new TLegend (xlegmin ,
                          ylegmax - yLegendWidth * LegendSize * legfactor  ,
@@ -94,8 +106,9 @@ void UALegend::BuildLegend() {
 
   Legend_->SetBorderSize(0);
   Legend_->SetFillColor(0);
-  Legend_->SetTextSizePixels(globalLegendTextSize);
-  Legend_->Draw();
+  Legend_->SetTextSize(globalLegendTextSize);
+  Legend_->SetHeader(LegendTitle_);
+  Legend_->Draw("same");
 
 
 }

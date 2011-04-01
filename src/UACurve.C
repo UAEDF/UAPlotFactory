@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <fstream>
 #include <sstream>
 using namespace std;
 
@@ -17,13 +18,14 @@ UACurve::UACurve( bool isMC , TString Legend ){
   isMC_       = isMC ;
   Legend_     = Legend ;
   Curve_      = (TObject*) new TH1D() ; // Dummy TH1
+  SetGoodAxis();
 
 }
 
 // Constructor: Fetching TObject from file -------------------------------------
 
 UACurve::UACurve( bool isMC, TString fileName , TString histoName , TString Legend ){
-
+  cout << endl;
   cout << "UACurve: Constructor" << endl ;
 
 /*
@@ -36,15 +38,66 @@ UACurve::UACurve( bool isMC, TString fileName , TString histoName , TString Lege
   isMC_       = isMC;
   Legend_     = Legend ;
 
-  TFile*   File     = new TFile(fileName,"READ");  
+  TFile*   File     = new TFile(fileName,"READ"); 
+  cout <<  "File: " <<  fileName << " ptr: " <<  File << endl;
+  //File->Print();
+  //bool test = File->cd("Difflvl_cut1/Centrlvl_INEL_cut1/HFlvl_nocut_INEL_cut1/EvtSel_HF0_nocut_INEL_cut1/Track_full_HF0_nocut_INEL_cut1");
+  //cout << "gooddir =" << test << endl;  
   TObject* Curve    = (TObject*) File->Get(histoName); 
+  if(!histoName.Contains("/") ) {
+    Curve= (TObject*) File->FindObjectAny(histoName);
+  }
+  cout <<  "Curve: " << histoName << " ptr: " << Curve << endl;
+  if ( Curve == NULL ) Curve  = (TObject*) new TH1D();
   gROOT->cd(); // Have to create the new object Curve_ outside of gDirectory from File_
   Curve_ = (TObject*) Curve->Clone();
   delete  Curve ;
   File->Close();
   delete File;
+  SetGoodAxis();
   
 }
+
+
+// Constructor: Reading data from file     -------------------------------------
+
+UACurve::UACurve( bool isMC , TString txtFile , Int_t type):isMC_(isMC){
+  int	n = 0;
+  const int  nmax = 700 ;
+  double x[nmax], xl[nmax] , xh[nmax] , y[nmax] , ex[nmax] , eyl[nmax] , eyh[nmax] , wh[nmax] ;
+  double syl[nmax] , syh[nmax] ;
+
+  ifstream mydata ;
+  mydata.open (txtFile);
+
+  if ( type == 0 ) {
+    while (mydata >>  xl[n] >> xh[n] >> y[n] >> eyh[n] >> eyl[n]>> syh[n] >> syl[n] ) {
+      ex[n] = 0.;
+      eyl[n] = -eyl[n] ;
+      x[n]  = xl[n]+(xh[n]-xl[n])/2;
+    
+      // div by binwidth
+      if ( false ) {
+        float ww = 1+ xh[n]-xl[n] ;
+         y [n] /= ww ;
+        eyl[n] /= ww ;
+        eyh[n] /= ww ;
+      }
+    
+      ++n;
+    }
+  }
+  
+  mydata.close();
+
+  Curve_ = new TGraphAsymmErrors(n,x,y,ex,ex,eyl,eyh);
+  SetGoodAxis();
+
+}
+
+
+
+
 
 // Destructor ------------------------------------------------------------------
 
@@ -117,9 +170,9 @@ void UACurve::Add( UACurve* Curv1 , Double_t c1 ) {
 
 // Add : this = c1*Curv1 + c2*Curv2 ---------------------------------------------
 
-void UACurve::Add( UACurve* Curv1 , UACurve* Curv2 , Double_t c1 , Double_t c2 ) {
-  ;
-}
+//void UACurve::Add( UACurve* Curv1 , UACurve* Curv2 , Double_t c1 , Double_t c2 ) {
+//  ;
+//}
 
 
 // Scale( Double_t cScale ) -----------------------------------------------------
@@ -284,6 +337,39 @@ void UACurve::ApplyStyle(){
    }
 
 }
+
+
+
+// SetGoodAxis() -------------------------------------------------------------------
+void UACurve::SetGoodAxis(){
+  TAxis* xaxis;
+  TAxis* yaxis;
+  
+  if ( this->isTH1() ) { 
+  xaxis = ((TH1*) Curve_)->GetXaxis();
+  yaxis = ((TH1*) Curve_)->GetYaxis();
+  }
+  else if ( this->isTH2() ) {
+  cout << "[UACurve::Draw] WARNING: Unknown Type : " << Curve_->ClassName() <<  endl; 
+  }
+  else if ( this->isTGraph() ) {
+    xaxis = ((TGraph*) Curve_)->GetXaxis();
+    yaxis = ((TGraph*) Curve_)->GetYaxis();
+  }
+  else {
+    cout << "[UACurve::Draw] WARNING: Unknown Type : " << Curve_->ClassName() <<  endl;
+  }
+  
+  xaxis->SetTitleOffset(0.7);
+  yaxis->SetTitleOffset(1.3);
+  xaxis->SetTitleSize(0.05);
+  yaxis->SetTitleSize(0.05);
+  xaxis->SetLabelSize(0.04);
+  yaxis->SetLabelSize(0.04);
+  //xaxis->SetNdivisions(105);
+  yaxis->SetNdivisions(206);
+}
+
 
 // GetMaximum() --------------------------------------------------------------------
 

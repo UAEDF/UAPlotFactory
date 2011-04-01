@@ -109,7 +109,7 @@ void UAPlot::AutoStyle() {
 
   // Up to 15 MC
   Color_t colors  [5] = { kBlack , kRed , kMagenta , kBlue , kGreen } ;
-  Style_t lines   [3] = {    1   ,   2  ,    3 } ;
+//  Style_t lines   [3] = {    1   ,   2  ,    3 } ;
 
   int iMC   = 0 ;
   int iData = 0 ;
