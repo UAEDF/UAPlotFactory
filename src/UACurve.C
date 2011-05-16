@@ -64,7 +64,7 @@ UACurve::UACurve( bool isMC, TString fileName , TString histoName , TString Lege
 UACurve::UACurve( bool isMC , TString txtFile , Int_t type):isMC_(isMC){
   int	n = 0;
   const int  nmax = 700 ;
-  double x[nmax], xl[nmax] , xh[nmax] , y[nmax] , ex[nmax] , eyl[nmax] , eyh[nmax] , wh[nmax] ;
+  double x[nmax], xl[nmax] , xh[nmax] , y[nmax] , ex[nmax] , eyl[nmax] , eyh[nmax] ;// wh[nmax] ;
   double syl[nmax] , syh[nmax] ;
 
   ifstream mydata ;
@@ -280,7 +280,8 @@ void UACurve::Norm( Int_t binx1, Int_t binx2 , Int_t biny1, Int_t biny2 ) {
 
 void UACurve::Norm ( UACurve* RefCurve , Int_t binx1, Int_t binx2 , Int_t biny1, Int_t biny2 ){
    this->Norm () ;
-   cout << "[UACurve::Norm] WARNING: Passing Pointers Not Implemented" << endl; 
+   cout << "[UACurve::Norm] WARNING: Passing Pointers Not Implemented" << endl;
+   cout << "   args : " << RefCurve << "  " << binx1 << "  " << binx2 << "  " << biny1 << "  " << biny2 << "  " << endl;//just to remove waring in compilation 
 }
 
 void UACurve::Norm ( UACurve& RefCurve , Int_t binx1, Int_t binx2 , Int_t biny1, Int_t biny2 ){
@@ -342,8 +343,8 @@ void UACurve::ApplyStyle(){
 
 // SetGoodAxis() -------------------------------------------------------------------
 void UACurve::SetGoodAxis(){
-  TAxis* xaxis;
-  TAxis* yaxis;
+  TAxis* xaxis = 0;
+  TAxis* yaxis = 0;
   
   if ( this->isTH1() ) { 
   xaxis = ((TH1*) Curve_)->GetXaxis();
