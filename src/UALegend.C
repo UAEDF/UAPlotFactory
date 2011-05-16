@@ -56,7 +56,7 @@ void UALegend::AddLegend ( bool isMC , UACurveStyle& Style , TString LegText ) {
 void UALegend::AddLegend (UACurve& Curve , TString LegText ) {
 
   vLegCurves_.push_back(new UACurve( Curve.isMC() ));
-  vLegCurves_.at(vLegCurves_.size()-1)->SetStyle( &((UACurveStyle) Curve) );
+  vLegCurves_.at(vLegCurves_.size()-1)->SetStyle( dynamic_cast<UACurveStyle&> (Curve) );
   TString TestLeg(LegText); 
   TestLeg.ToLower();
   if ( TestLeg != "none" ) { vLegCurves_.at(vLegCurves_.size()-1)->SetLegend(LegText); }
