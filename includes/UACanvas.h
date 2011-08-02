@@ -56,6 +56,7 @@ class UACanvas {
     void GlueAllPads();
 
     void AddText(TString , Double_t , Double_t , Double_t = 0.04);
+    void AddText(TString , Double_t = 0.04);
 };
 
 #endif
