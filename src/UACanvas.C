@@ -209,10 +209,18 @@ void UACanvas::GlueAllPads( ) {
 }
 
 void UACanvas::AddText( TString text , Double_t x , Double_t y , Double_t size ) {
+
+  cout << "[UACanvas::AddText()] Adding text \"" << text << "\" at pos : " << x << " , " << y << endl;
   TLatex* t = new TLatex( x , y , text);
   t->SetNDC(kTRUE);
   t->SetTextSize(size);
   t->Draw();
+}
+
+void UACanvas::AddText( TString text , Double_t size ) {
+  Int_t length = text.Length()/10+1;
+  Double_t x = (1.-0.1*length)/2.;
+  this->AddText(text,x,0.965,size);
 }
 
 void UACanvas::Save(TString name , TString basedir){

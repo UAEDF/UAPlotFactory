@@ -65,7 +65,7 @@ UACurve::UACurve( bool isMC , TString txtFile , Int_t type):isMC_(isMC){
   int	n = 0;
   const int  nmax = 700 ;
   double x[nmax], xl[nmax] , xh[nmax] , y[nmax] , ex[nmax] , eyl[nmax] , eyh[nmax] ;// wh[nmax] ;
-  double syl[nmax] , syh[nmax] ;
+  double syl[nmax] , syh[nmax] , tyl[nmax] , tyh[nmax] ;
 
   ifstream mydata ;
   mydata.open (txtFile);
@@ -75,7 +75,9 @@ UACurve::UACurve( bool isMC , TString txtFile , Int_t type):isMC_(isMC){
       ex[n] = 0.;
       eyl[n] = -eyl[n] ;
       x[n]  = xl[n]+(xh[n]-xl[n])/2;
-    
+      tyl[n] = sqrt( pow(eyl[n],2) + pow(syl[n],2) );
+      tyh[n] = sqrt( pow(eyh[n],2) + pow(syh[n],2) );
+       
       // div by binwidth
       if ( false ) {
         float ww = 1+ xh[n]-xl[n] ;
@@ -90,7 +92,7 @@ UACurve::UACurve( bool isMC , TString txtFile , Int_t type):isMC_(isMC){
   
   mydata.close();
 
-  Curve_ = new TGraphAsymmErrors(n,x,y,ex,ex,eyl,eyh);
+  Curve_ = new TGraphAsymmErrors(n,x,y,ex,ex,tyl,tyh);
   SetGoodAxis();
 
 }
@@ -177,10 +179,12 @@ void UACurve::Add( UACurve* Curv1 , Double_t c1 ) {
 
 // Scale( Double_t cScale ) -----------------------------------------------------
 
-void UACurve::Scale ( Double_t cScale ){
+void UACurve::Scale ( Double_t cScale , TString opt ){
+
+  cout << "[UACurve::Scale()] Scaling with factor " << cScale << " and option " << opt << endl;
 
   // TH1
-  if      (this->isTH1()) { ((TH1*) Curve_)->Scale(cScale) ; }    
+  if      (this->isTH1()) { ((TH1*) Curve_)->Scale(cScale , opt) ; }    
 
   // TH2
   else if (this->isTH2()) { ((TH2*) Curve_)->Scale(cScale) ; } 
@@ -193,9 +197,12 @@ void UACurve::Scale ( Double_t cScale ){
       ((TGraphAsymmErrors*) Curve_)->GetPoint(i,x,y);
       eyup   = ((TGraphAsymmErrors*) Curve_)->GetErrorYhigh(i);
       eydown = ((TGraphAsymmErrors*) Curve_)->GetErrorYlow(i);
-      y      *= cScale;
-      eyup   *= cScale;
-      eydown *= cScale;
+      
+      Double_t binwidth = 1.;
+      if(opt.Contains("width")) binwidth = ((TGraphAsymmErrors*) Curve_)->GetErrorXhigh(i) + ((TGraphAsymmErrors*) Curve_)->GetErrorXlow(i);
+      y      *= cScale / binwidth;
+      eyup   *= cScale / binwidth;
+      eydown *= cScale / binwidth;
       ((TGraphAsymmErrors*) Curve_)->SetPoint(i,x,y);
       ((TGraphAsymmErrors*) Curve_)->SetPointEYhigh(i,eyup);
       ((TGraphAsymmErrors*) Curve_)->SetPointEYlow(i,eydown);
@@ -218,7 +225,7 @@ Double_t UACurve::Integral ( Int_t binx1, Int_t binx2 , Int_t biny1, Int_t biny2
        cout << "[UACurve::Integral] Out of Range --> return 0 " << endl;
        return 0;
     }
-    return ((TH1*) Curve_)->Integral(binx1,binx2) ;
+    return ((TH1*) Curve_)->Integral(binx1,binx2,"width") ;
 
   // TH2 Like
   } else if ( this->isTH2() ) {
@@ -347,11 +354,13 @@ void UACurve::SetGoodAxis(){
   TAxis* yaxis = 0;
   
   if ( this->isTH1() ) { 
-  xaxis = ((TH1*) Curve_)->GetXaxis();
-  yaxis = ((TH1*) Curve_)->GetYaxis();
+    xaxis = ((TH1*) Curve_)->GetXaxis();
+    yaxis = ((TH1*) Curve_)->GetYaxis();
   }
   else if ( this->isTH2() ) {
-  cout << "[UACurve::Draw] WARNING: Unknown Type : " << Curve_->ClassName() <<  endl; 
+    xaxis = ((TH1*) Curve_)->GetXaxis();
+    yaxis = ((TH1*) Curve_)->GetYaxis();
+    //cout << "[UACurve::Draw] WARNING: Unknown Type : " << Curve_->ClassName() <<  endl; 
   }
   else if ( this->isTGraph() ) {
     xaxis = ((TGraph*) Curve_)->GetXaxis();
@@ -368,7 +377,8 @@ void UACurve::SetGoodAxis(){
   xaxis->SetLabelSize(0.04);
   yaxis->SetLabelSize(0.04);
   //xaxis->SetNdivisions(105);
-  yaxis->SetNdivisions(206);
+  if(! this->isTH2())
+    yaxis->SetNdivisions(206);
 }
 
 
@@ -432,7 +442,20 @@ void UACurve::Draw(TString opt){
    if  ( this->isTH2()    ) ( (TH2*)    Curve_)->Draw(DrawOpt);
    if  ( this->isTGraph() ) ( (TGraph*) Curve_)->Draw(DrawOpt);
 
+   if  ( this->isTH2()    ) gPad->SetRightMargin(0.15);
 //   gPad->Update();
+
+}
+
+void UACurve::SerialBinKiller(){
+  if(this->isTH2()) cout << "[UACurve::SerialBinKiller()] Nothing to kill on a TH2F !" << endl;
+  else if(this->isTGraph()){
+    Double_t x = -1 , y = -1;
+    for( int i = 0 ; i < ( (TGraph*) Curve_)->GetN() ; ++i){
+      ((TGraph*) Curve_)->GetPoint(i , x , y);
+      if( y == 0. ) ((TGraph*) Curve_)->RemovePoint(i);
+    }
+  }
 
 }
 

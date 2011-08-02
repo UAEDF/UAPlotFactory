@@ -26,6 +26,8 @@ class UALegend {
     UALegend() ;
     UALegend(TString) ;
     virtual ~UALegend() ;
+    
+   TLegend* GetLegend(){return Legend_;} ;
    
     void AddLegend( bool , UACurveStyle& , TString="NONE" ) ;
     void AddLegend(     UACurve&         , TString="NONE" ) ;

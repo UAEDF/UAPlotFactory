@@ -51,7 +51,7 @@ class UACurve : public UACurveStyle  {
     void Add( UACurve* , UACurve* , Double_t =1. , Double_t =1. ) ; // this = c1*Curv1 + c2*Curv2
 
 
-    void Scale ( Double_t = 1. );
+    void Scale ( Double_t = 1. , TString = "");
     Double_t Integral ( Int_t=-1 , Int_t=-1 , Int_t=-1 , Int_t=-1 ); 
     void Norm  ( Int_t=-1 , Int_t=-1 , Int_t=-1 , Int_t=-1  );
     void Norm  ( UACurve& , Int_t=-1 , Int_t=-1 , Int_t=-1 , Int_t=-1 );
@@ -71,6 +71,9 @@ class UACurve : public UACurveStyle  {
     Double_t GetMinimum() ; // Find Minimum 
  
     void Draw(TString ="");
+
+    void SerialBinKiller();
+
 
   // Operators -----------------------------------
 
